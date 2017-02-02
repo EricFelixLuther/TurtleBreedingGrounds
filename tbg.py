@@ -2,13 +2,36 @@ import turtle
 import random
 import time
 
-class MyTurtles(turtle.Turtle):
-    def __init__(self):
-        super(MyTurtles, self).__init__()
+class TurtlesPolygon():
+    def __init__(self, number_of_turtles=1, colorful=False):
+	self.turtles = []
+	for i in xrange(number_of_turtles):
+	    if colorful:
+		self.turtles.append(MyTurtle(color="random"))
+	    else:
+		self.turtles.append(MyTurtle())
+
+    def go_turtles(self):
+	while True:
+	    for each in self.turtles:
+		each.forward(20)
+		each.left(each.get_random(0, 359))
+
+class MyTurtle(turtle.Turtle):
+    def __init__(self, color=None):
+        super(MyTurtle, self).__init__()
         #self.setup(800, 600)
         self.showturtle()
 	self.speed(0)
 	self.tracer(1, 0)
+	self.colormode(255)
+	if color:
+	    if color == "random":
+		self.pencolor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+	    elif type(color) == str or type(color) != str and len(color) == 1:
+		self.pencolor(color)
+	    else:
+		self.pencolor(*color)
 
     def get_random(self, x=0, y=100):
         return random.randint(x, y)
@@ -47,5 +70,13 @@ class MyTurtles(turtle.Turtle):
 		print("Bye")
 		break
 
-tp = MyTurtles()        
-tp.continuous_pretty_shape(100, max_angle=90, max_steps=10)
+
+def draw_pretty_shapes():
+    tp = MyTurtle()
+    tp.continuous_pretty_shape(100, max_angle=90, min_steps=1, max_steps=5)
+
+def do_random_stuff():
+    tp = TurtlesPolygon(10, True)
+    tp.go_turtles()
+
+do_random_stuff()
