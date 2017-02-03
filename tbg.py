@@ -7,15 +7,17 @@ from __builtin__ import False
 
 class TurtlesPolygon():
     def __init__(self, number_of_turtles=1, colorful=False, max_y=300, min_y=-300, max_x=300, min_x=-300):
-        self.turtles = []
+        self._repopulate_turtles(number_of_turtles, colorful)
         self.top = max_y
         self.bot = min_y
         self.left = min_x
         self.right = max_x
-        self._populate_turtles(number_of_turtles, colorful)
-        self.constructor = MyTurtle()
-        self.constructor.hideturtle()
+        self._create_constructor()
         self._draw_boundaries()
+
+    def _repopulate_turtles(self, number_of_turtles, colorful):
+        self.turtles = []
+        self._populate_turtles(number_of_turtles, colorful)
 
     def _populate_turtles(self, number_of_turtles, colorful):
         for _ in xrange(number_of_turtles):
@@ -23,6 +25,10 @@ class TurtlesPolygon():
                 self.turtles.append(MyTurtle(color="random"))
             else:
                 self.turtles.append(MyTurtle())
+
+    def _create_constructor(self):
+        self.constructor = MyTurtle()
+        self.constructor.hideturtle()
 
     def _draw_boundaries(self):
         self.constructor.penup()
@@ -49,6 +55,10 @@ class TurtlesPolygon():
 
     def any_turtles_alive(self):
         return all(not each.is_alive for each in self.turtles)
+
+    def revive_all_turtles(self):
+        for each in self.turtles:
+            each.is_alive = True
 
     def go_turtles(self, kill_when_outside_boundaries=False):
         stop = False
@@ -77,8 +87,9 @@ class TurtlesPolygon():
 
 
 class MyTurtle(turtle.Turtle):
-    def __init__(self, color=None):
+    def __init__(self, name=None, color=None):
         super(MyTurtle, self).__init__()
+        self.name = name
         #self.setup(800, 600)
         self.showturtle()
         self.speed(0)
