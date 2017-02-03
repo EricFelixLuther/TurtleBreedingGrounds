@@ -2,22 +2,27 @@ import turtle
 import random
 import time
 import datetime
+from __builtin__ import False
+
 
 class TurtlesPolygon():
-    def __init__(self, number_of_turtles=1, colorful=False, max_y=300, min_y=-300, min_x=-300, max_x=300):
+    def __init__(self, number_of_turtles=1, colorful=False, max_y=300, min_y=-300, max_x=300, min_x=-300):
         self.turtles = []
         self.top = max_y
         self.bot = min_y
         self.left = min_x
         self.right = max_x
+        self._populate_turtles(number_of_turtles, colorful)
+        self.constructor = MyTurtle()
+        self.constructor.hideturtle()
+        self._draw_boundaries()
+
+    def _populate_turtles(self, number_of_turtles, colorful):
         for _ in xrange(number_of_turtles):
             if colorful:
                 self.turtles.append(MyTurtle(color="random"))
             else:
                 self.turtles.append(MyTurtle())
-        self.constructor = MyTurtle()
-        self.constructor.hideturtle()
-        self._draw_boundaries()
 
     def _draw_boundaries(self):
         self.constructor.penup()
@@ -42,15 +47,33 @@ class TurtlesPolygon():
         else:
             return False
 
+    def any_turtles_alive(self):
+        return all(not each.is_alive for each in self.turtles)
+
     def go_turtles(self, kill_when_outside_boundaries=False):
-        while self.turtles != []:
+        stop = False
+        while not stop:
             for each in self.turtles:
-                each.forward(20)
-                each.left(each.get_random(0, 359))
-                if kill_when_outside_boundaries:
-                    if not self.in_boundaries(*each.position()):
-                        del self.turtles[self.turtles.index(each)]
+                if each.is_alive:
+                    each.forward(20)
+                    each.left(each.get_random(0, 359))
+                    if kill_when_outside_boundaries:
+                        if not self.in_boundaries(*each.position()):
+                            each.is_alive = False
+            stop = self.any_turtles_alive()
         print("All turtles are dead.")
+
+    def continuous_go_turtles(self):
+        try:
+            while True:
+                self.constructor.restart()
+                self._draw_boundaries()
+                self.go_turtles(True)
+                next_counter()
+                for each in self.turtles:
+                    each.restart()
+        except KeyboardInterrupt:
+            print("Bye")
 
 
 class MyTurtle(turtle.Turtle):
@@ -68,6 +91,7 @@ class MyTurtle(turtle.Turtle):
                 self.pencolor(color)
             else:
                 self.pencolor(*color)
+        self.is_alive = True
 
     def get_random(self, x=0, y=100):
         return random.randint(x, y)
@@ -80,28 +104,28 @@ class MyTurtle(turtle.Turtle):
     def position(self, accurate=False):
         position = super(MyTurtle, self).position()
         if accurate:
-            return (int(position[0]), int(position[1]))
-        else:
             return position
+        else:
+            return (int(position[0]), int(position[1]))
 
     def compare_position(self, x=0, y=0, accurate=False):
         position = self.position(accurate)
         if accurate:
-            return (int(x), int(y)) == position
-        else:
             return (x, y) == position
-            
+        else:
+            return (int(x), int(y)) == position
 
     def pretty_shape(self, length=100, min_angle=1, max_angle=180, min_steps=2, max_steps=2):
         start_time = datetime.datetime.now()
-        jumps = [self.get_random(1, 90) for _ in xrange(self.get_random(min_steps, max_steps))]
+        jumps = [self.get_random(min_angle, max_angle) for _ in xrange(self.get_random(min_steps, max_steps))]
         print jumps
-        while True:
+        stop = False
+        while not stop:
             for jump in jumps:
                 self.forward(length)
                 self.left(jump)
                 if self.compare_position():
-                    break
+                    stop = True
         delta = datetime.datetime.now() - start_time
         print("Time taken to draw this picture: %s." % str(delta))
 
@@ -111,25 +135,31 @@ class MyTurtle(turtle.Turtle):
                 self.restart()
                 self.pretty_shape(length, min_angle, max_angle, min_steps, max_steps)
                 print("Done")
-                for i in xrange(0, 10):
-                    print("Next picture in: %d." % (10 - i))
-                    time.sleep(1)
+                next_counter()
             except KeyboardInterrupt:
                 print("Bye")
                 break
 
 
-def draw_pretty_shapes():
-    tp = MyTurtle()
-    tp.continuous_pretty_shape(100, max_angle=90, min_steps=1, max_steps=5)
+def next_counter():
+    for i in xrange(0, 10):
+        print("Next picture in: %d." % (10 - i))
+        time.sleep(1)
 
-def do_random_stuff():
-    tp = TurtlesPolygon(10, True)
-    try:
-        tp.go_turtles(kill_when_outside_boundaries=True)
-    except KeyboardInterrupt:
-        print("Bye")
-    raw_input("Game over")
-
-do_random_stuff()
-#draw_pretty_shapes()
+stop = False
+while not stop:
+    print("Co chcesz?")
+    print("1. Ladne ksztalty")
+    print("2. Zolwie w ramce")
+    x = raw_input()
+    if x == '1':
+        tp = MyTurtle()
+        tp.continuous_pretty_shape(100, max_angle=90, min_steps=1, max_steps=5)
+    elif x == '2':
+        tp = TurtlesPolygon(10, True, 500, -500, 500, -500)
+        tp.continuous_go_turtles()
+    elif x == '':
+        raw_input("Game over")
+        stop = True
+    else:
+        print("Nie rozumiem.")
