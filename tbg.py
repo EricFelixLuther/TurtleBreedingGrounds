@@ -2,7 +2,6 @@ import turtle
 import random
 import time
 import datetime
-from __builtin__ import False
 
 
 class TurtlesPolygon():
@@ -67,9 +66,8 @@ class TurtlesPolygon():
                 if each.is_alive:
                     each.forward(20)
                     each.left(each.get_random(0, 359))
-                    if kill_when_outside_boundaries:
-                        if not self.in_boundaries(*each.position()):
-                            each.is_alive = False
+                    if kill_when_outside_boundaries and not self.in_boundaries(*each.position()):                        
+                        each.is_alive = False
             stop = self.any_turtles_alive()
         print("All turtles are dead.")
 
@@ -87,12 +85,12 @@ class TurtlesPolygon():
 
 
 class MyTurtle(turtle.Turtle):
-    def __init__(self, name=None, color=None):
+    def __init__(self, name=None, color=None, speed=0):
         super(MyTurtle, self).__init__()
         self.name = name
         #self.setup(800, 600)
         self.showturtle()
-        self.speed(0)
+        self.speed(speed)
         self.tracer(1, 0)
         self.screen.colormode(255)
         if color:
@@ -138,14 +136,13 @@ class MyTurtle(turtle.Turtle):
                 if self.compare_position():
                     stop = True
         delta = datetime.datetime.now() - start_time
-        print("Time taken to draw this picture: %s." % str(delta))
+        print("Done. Time taken to draw this picture: %s." % str(delta))
 
     def continuous_pretty_shape(self, length=100, min_angle=1, max_angle=180, min_steps=2, max_steps=2):
         while True:
             try:
                 self.restart()
                 self.pretty_shape(length, min_angle, max_angle, min_steps, max_steps)
-                print("Done")
                 next_counter()
             except KeyboardInterrupt:
                 print("Bye")
