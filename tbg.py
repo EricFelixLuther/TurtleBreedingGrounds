@@ -80,6 +80,7 @@ class TurtlesPolygon():
                 next_counter()
                 for each in self.turtles:
                     each.restart()
+                self.revive_all_turtles()
         except KeyboardInterrupt:
             print("Bye")
 
